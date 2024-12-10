@@ -1,2 +1,0 @@
-set terminal windows
-plot 'graph.dat' linecolor 'red' with lines, 'lagr.dat' linecolor 'blue' with lines
