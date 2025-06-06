@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Отчёт по задаче</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f8f8ff;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 30px auto 30px auto;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+            padding: 32px 32px 32px 32px;
+        }
+        h1, h2, h3 {
+            color: #2a2a6c;
+            text-align: center;
+            margin-top: 0.5em;
+            margin-bottom: 0.5em;
+        }
+        .section {
+            margin-bottom: 48px;
+        }
+        .param-table, .result-table {
+            border-collapse: collapse;
+            margin: 0 auto 24px auto;
+            min-width: 350px;
+            background: #f4f6fa;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+        .param-table th, .param-table td, .result-table th, .result-table td {
+            border: 1px solid #d1d5db;
+            padding: 8px 18px;
+            font-size: 15px;
+            text-align: center;
+        }
+        .param-table th, .result-table th {
+            background: #e0e0ff;
+            font-weight: 600;
+        }
+        .img-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .img-row img {
+            max-width: 95%;
+            height: auto;
+            border: 1px solid #ccc;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin: 0 auto;
+            display: block;
+        }
+        .summary-table {
+            margin-top: 30px;
+        }
+        @media (max-width: 700px) {
+            .container { padding: 8px; }
+            .img-row img { max-width: 100%; }
+            .param-table, .result-table { min-width: 0; font-size: 13px; }
+        }
+    </style>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Отчёт по расчёту собственных значений и функций</h1>
+        <div class="section">
+            <h2>Описание задачи</h2>
+            <div style="text-align:center; margin-bottom: 18px;">
+                <span style="font-size:1.2em;">
+                    $$ u''(x) = -(\epsilon(x) - \gamma^2)\,u(x) - \alpha\,|u(x)|^p , $$
+                </span>
+                <h3>где:</h3>
+                <span style="font-size:1.2em;">
+                    $$ x \in \left[0; 5 + (-1)^n n^{-1}\right] $$
+                    $$ \alpha = \beta + \frac{1}{n^2 + 10} $$
+                    $$ \beta = {1, 0.1, 0.01} $$
+                    $$ \epsilon(x) = \left(1 + \frac{1}{n}\right)x + \frac{x^2}{n^3 + 1} $$
+                    $$ p = 3 + \frac{1}{n+1} $$
+                </span>
+            </div>
+            <h2>Параметры задачи для n = {{ n }}</h2>
+            <table class="param-table">
+                <tr><th>Параметр</th><th>Значение</th></tr>
+                <tr><td>p</td><td>{{ p }}</td></tr>
+                <tr><td>h</td><td>{{ h }}</td></tr>
+                <tr><td>Число мод</td><td>{{ num_eigen }}</td></tr>
+            </table>
+        </div>
+        {% for run in runs %}
+        <div class="section">
+            <h2>Результаты для β = {{ run.beta }}, α = {{ run.alpha }}</h2>
+            <div class="img-row">
+                <img src="{{ run.img_path }}" alt="График">
+            </div>
+            <h3>Таблица результатов</h3>
+            <table class="result-table">
+                <tr>
+                    <th>Мода</th>
+                    <th>γ (gamma)</th>
+                    <th>Невязка</th>
+                    <th>Дисперсия</th>
+                    <th>Центр масс</th>
+                </tr>
+                {% for i in range(run.gamma_vals|length) %}
+                <tr>
+                    <td>{{ i+1 }}</td>
+                    <td>{{ "%.5f"|format(run.gamma_vals[i]) }}</td>
+                    <td>{{ "%.2e"|format(run.residuals[i]) }}</td>
+                    <td>{{ "%.3f"|format(run.dispersions[i]) }}</td>
+                    <td>{{ "%.3f"|format(run.centers[i]) }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        {% endfor %}
+        <div class="section summary-table">
+            <h2>Итоговая таблица невязок</h2>
+            <table class="result-table">
+                <tr>
+                    <th>Параметры</th>
+                    {% for i in range(num_eigen) %}
+                    <th>Мода {{ i+1 }}</th>
+                    {% endfor %}
+                </tr>
+                {% for run in runs %}
+                <tr>
+                    <td>β={{ run.beta }}, α={{ run.alpha }}</td>
+                    {% for r in run.residuals %}
+                    <td>{{ "%.2e"|format(r) }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</body>
+</html>
